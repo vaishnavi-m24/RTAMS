@@ -51,10 +51,8 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
     try {
-      const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
-      createUserDto.password = hashedPassword;
-
+      // Hash the password before storing it
+      createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
       await this.userModel.create(createUserDto);
       return { message: 'User created successfully' };
     } catch (error) {

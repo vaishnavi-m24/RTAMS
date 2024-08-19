@@ -1,5 +1,5 @@
 
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body , HttpException,HttpStatus} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './login.dto';
 
@@ -9,7 +9,21 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    const { mobileNumber, password } = loginDto;
+    try {
+      const user = await this.authService.validateUser(mobileNumber, password);
+      if (!user) {
+        throw new HttpException('Invalid mobile number or password', HttpStatus.UNAUTHORIZED);
+      }
+      const token = await this.authService.login(user);
+      return { message: 'Login successful', token: token.access_token };
+    } catch (error) {
+      if (error.response) {
+        throw new HttpException(error.response, error.status);
+      } else {
+        throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 }
 

@@ -32,7 +32,41 @@
 // }
 
 
-import { Injectable } from '@nestjs/common';
+// import { Injectable } from '@nestjs/common';
+// import { JwtService } from '@nestjs/jwt';
+// import { UserService } from '../users/users.service';
+// import * as bcrypt from 'bcrypt';
+
+// @Injectable()
+// export class AuthService {
+//   constructor(
+//     private usersService: UserService,
+//     private jwtService: JwtService,
+//   ) {}
+
+//   async validateUser(mobileNumber: string, pass: string): Promise<any> {
+//     const user = await this.usersService.findByMobileNumber(mobileNumber);
+//     if (user && await bcrypt.compare(pass, user.password)) {
+//       const { password, ...result } = user;
+//       return result;
+//     }
+//     return null;
+//   }
+
+//   async login(user: any) {
+//     const payload = { mobileNumber: user.mobileNumber, sub: user.id };
+//     return {
+//       access_token: this.jwtService.sign(payload),
+//     };
+//   }
+// }
+
+
+
+// import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+// import { JwtService } from '@nestjs/jwt';
+// import { UserService } from '../users/users.service';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -40,13 +74,13 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UserService,
-    private jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async validateUser(mobileNumber: string, pass: string): Promise<any> {
-    const user = await this.usersService.findByMobileNumber(mobileNumber);
-    if (user && await bcrypt.compare(pass, user.password)) {
+    const user = await this.userService.findByMobileNumber(mobileNumber);
+    if (user && await bcrypt.compare(pass, user.password)) { // Use bcrypt to compare passwords
       const { password, ...result } = user;
       return result;
     }
@@ -54,7 +88,7 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { mobileNumber: user.mobileNumber, sub: user.id };
+    const payload = { mobileNumber: user.mobileNumber, sub: user.userId };
     return {
       access_token: this.jwtService.sign(payload),
     };
