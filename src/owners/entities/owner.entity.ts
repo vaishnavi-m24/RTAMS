@@ -1,9 +1,4 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,} from 'sequelize-typescript';
 import { IsString, Length, IsOptional } from 'class-validator';
 
 @Table({ tableName: 'owners' })

@@ -1,9 +1,7 @@
 import {Table,Column,Model,DataType,} from 'sequelize-typescript';
 import { IsString, Length } from 'class-validator';
 
-@Table({ tableName: 'rto_divisions',
-  timestamps: false,
- })
+@Table({ tableName: 'rto_divisions' })
 
 export class RtoDivision extends Model<RtoDivision> {
   @Column({

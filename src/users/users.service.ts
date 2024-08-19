@@ -1,4 +1,41 @@
-import { Injectable } from '@nestjs/common';
+// import { Injectable } from '@nestjs/common';
+// import { InjectModel } from '@nestjs/sequelize';
+// import { User } from './entities/user.entity';
+// import { CreateUserDto } from './dto/create-user.dto';
+// import { UpdateUserDto } from './dto/update-user.dto';
+
+// @Injectable()
+// export class UserService {
+//   constructor(
+//     @InjectModel(User)
+//     private readonly userModel: typeof User
+//   ) {}
+
+//   async create(createUserDto: CreateUserDto): Promise<User> {
+//     return this.userModel.create(createUserDto);
+//   }
+
+//   async findAll(): Promise<User[]> {
+//     return this.userModel.findAll();
+//   }
+
+//   async findOne(id: string): Promise<User> {
+//     return this.userModel.findByPk(id);
+//   }
+
+//   async update(id: string, updateUserDto: UpdateUserDto): Promise<[number, User[]]> {
+//     return this.userModel.update(updateUserDto, {
+//       where: { id },
+//       returning: true
+//     });
+//   }
+
+//   async remove(id: string): Promise<number> {
+//     return this.userModel.destroy({ where: { id } });
+//   }
+// }
+
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,26 +48,63 @@ export class UserService {
     private readonly userModel: typeof User
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    return this.userModel.create(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
+    try {
+      await this.userModel.create(createUserDto);
+      return { message: 'User created successfully' };
+    } catch (error) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
+  
 
   async findAll(): Promise<User[]> {
-    return this.userModel.findAll();
+    try {
+      return await this.userModel.findAll();
+    } catch (error) {
+      throw new HttpException('Failed to retrieve users', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async findOne(id: string): Promise<User> {
-    return this.userModel.findByPk(id);
+    try {
+      const user = await this.userModel.findByPk(id);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException('Failed to retrieve user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<[number, User[]]> {
-    return this.userModel.update(updateUserDto, {
-      where: { id },
-      returning: true
-    });
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<{ message: string }> {
+    try {
+      const [affectedRows] = await this.userModel.update(updateUserDto, {
+        where: { id },
+        returning: true,
+      });
+      if (affectedRows === 0) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return { message: 'User updated successfully' };
+    } catch (error) {
+      throw new HttpException('Failed to update user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  async remove(id: string): Promise<number> {
-    return this.userModel.destroy({ where: { id } });
+  async remove(id: string): Promise<{ message: string }> {
+    try {
+      const deletedRows = await this.userModel.destroy({ where: { id } });
+      if (deletedRows === 0) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return { message: 'User deleted successfully' };
+    } catch (error) {
+      throw new HttpException('Failed to delete user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
