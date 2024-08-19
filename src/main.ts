@@ -1,16 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  const corsOptions: CorsOptions = {
-    origin: 'http://localhost:5173',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
-    credentials: true, 
-  };
+  app.enableCors({
+    origin: 'http://localhost:5173', // or '*' to allow all origins
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // if you need to allow cookies/auth headers
+  });
   await app.listen(3000);
 }
 bootstrap();
