@@ -40,6 +40,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -50,6 +51,10 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
     try {
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+      createUserDto.password = hashedPassword;
+
       await this.userModel.create(createUserDto);
       return { message: 'User created successfully' };
     } catch (error) {
@@ -59,7 +64,6 @@ export class UserService {
       throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  
 
   async findAll(): Promise<User[]> {
     try {
@@ -69,9 +73,10 @@ export class UserService {
     }
   }
 
-  async findOne(id: string): Promise<User> {
+  // Updated to find user by mobileNumber
+  async findByMobileNumber(mobileNumber: string): Promise<User> {
     try {
-      const user = await this.userModel.findByPk(id);
+      const user = await this.userModel.findOne({ where: { mobileNumber } });
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -83,6 +88,11 @@ export class UserService {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<{ message: string }> {
     try {
+      if (updateUserDto.password) {
+        const salt = await bcrypt.genSalt();
+        updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+      }
+
       const [affectedRows] = await this.userModel.update(updateUserDto, {
         where: { id },
         returning: true,

@@ -12,9 +12,9 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  @Get(':mobileNumber')
+  findByMobileNumber(@Param('mobileNumber') mobileNumber: string) {
+    return this.userService.findByMobileNumber(mobileNumber);
   }
 
   @Get()
