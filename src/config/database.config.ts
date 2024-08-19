@@ -5,7 +5,7 @@ export const databaseConfig: SequelizeModuleOptions = {
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'vaishnavi24',
+  password: 'postgres',
   database: 'rtams',
   autoLoadModels: true,
   synchronize: true,
