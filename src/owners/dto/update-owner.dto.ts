@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsMobilePhone, IsPostalCode, Length } from 'class-validator';
+import { IsString, IsOptional, IsMobilePhone, IsPostalCode, Length , IsEmail} from 'class-validator';
 
 export class UpdateOwnerDto {
   @IsString()
@@ -25,16 +25,22 @@ export class UpdateOwnerDto {
   @IsOptional()
   state?: string;
 
-  @IsPostalCode('IN')
+  @IsString()
+  @IsPostalCode()
+  @Length(6, 6, { message: 'Pincode must be exactly 6 digits' })
   @IsOptional()
   pincode?: string;
 
-  @IsMobilePhone('en-IN')
+  @IsEmail({}, { message: 'Invalid email address' })
+  @IsOptional()
+  email?: string;
+
+  @IsMobilePhone('en-IN', { strictMode: true }, { message: 'Contact number must be an Indian phone number' })
   @IsOptional()
   contactNo?: string;
 
   @IsString()
-  @Length(12, 12)
+  @Length(12, 12, { message: 'Aadhar number must be exactly 12 digits' })
   @IsOptional()
   aadharNo?: string;
 }

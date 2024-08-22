@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsDateString, IsEnum } from 'class-validator';
-import { FuelType } from '../entities/vehicle.entity'; 
+
+import { IsString, IsOptional, IsDateString, IsEnum, Matches } from 'class-validator';
+import { FuelType } from '../entities/vehicle.entity';
 
 export class UpdateVehicleDto {
   @IsString()
@@ -20,11 +21,16 @@ export class UpdateVehicleDto {
 
   @IsString()
   @IsOptional()
+  state2?: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^[A-HJ-NPR-Z0-9]{17}$/, { message: 'Invalid VIN number' }) // VIN number validation
   vinNumber?: string;
 
-  @IsEnum(FuelType)  
+  @IsEnum(FuelType)
   @IsOptional()
-  fuelType: FuelType;
+  fuelType?: FuelType;
 
   @IsOptional()
   rtoDivisionId?: number;

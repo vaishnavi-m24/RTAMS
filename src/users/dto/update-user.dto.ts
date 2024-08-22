@@ -1,13 +1,21 @@
-import { IsString, IsOptional, IsMobilePhone, Length } from 'class-validator';
+import { IsString, Length, Matches, IsOptional } from 'class-validator';
 
 export class UpdateUserDto {
-  
-  @IsMobilePhone('en-IN')
+  @IsString()
+  @Length(10, 10, { message: 'Mobile number must be exactly 10 digits' })
+  @Matches(/^[6-9][0-9]{9}$/, { message: 'Mobile number must be an Indian number starting with 6-9' })
   @IsOptional()
-  mobileNo?: string;
+  mobileNumber?: string;
 
   @IsString()
-  @Length(6, 20)
+  @Length(6, 20, { message: 'Password must be between 6 and 20 characters' })
   @IsOptional()
   password?: string;
+
+  @IsString()
+  @Length(6, 20, { message: 'Confirm password must be between 6 and 20 characters' })
+  @IsOptional()
+  confirmPassword?: string;
 }
+
+

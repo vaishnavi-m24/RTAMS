@@ -10,9 +10,11 @@ import { OwnersModule } from './owners/owners.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { databaseConfig } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
+import { User } from './users/entities/user.entity';
+
 
 @Module({
-  imports: [SequelizeModule.forRoot(databaseConfig),UsersModule, VehiclesModule, OwnershipHistoryModule, VehicleTransferModule, RtoDivisionsModule, OwnersModule, AuthModule],
+  imports: [SequelizeModule.forRoot(databaseConfig),UsersModule, VehiclesModule, OwnershipHistoryModule, VehicleTransferModule, RtoDivisionsModule, OwnersModule, AuthModule,User],
   controllers: [AppController],
   providers: [AppService],
 })

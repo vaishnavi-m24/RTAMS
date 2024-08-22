@@ -31,4 +31,12 @@ export class RtoDivisionController {
   remove(@Param('id') id: string) {
     return this.rtoDivisionService.remove(id);
   }
+
+  @Get('names')
+  async getDivisionNames(): Promise<{ divisionName: string }[]> {
+    const divisions = await this.rtoDivisionService.findAllDivisionNames();
+    return divisions.map(division => ({
+      divisionName: division.divisionName,
+    }));
+  }
 }

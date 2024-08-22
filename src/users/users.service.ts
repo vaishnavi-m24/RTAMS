@@ -1,118 +1,190 @@
-// import { Injectable } from '@nestjs/common';
-// import { InjectModel } from '@nestjs/sequelize';
+// // import { Injectable, BadRequestException } from '@nestjs/common';
+// // import { InjectModel } from '@nestjs/sequelize';
+// // import { User } from './entities/user.entity';
+// // import { CreateUserDto } from './dto/create-user.dto';
+// import * as bcrypt from 'bcrypt';
+
+
+// // @Injectable()
+// // export class UserService {
+// //   constructor(
+// //     @InjectModel(User)
+// //     private userModel: typeof User,
+// //   ) {}
+
+  
+//   // async createUser(createUserDto: CreateUserDto): Promise<User> {
+//   //   const { mobileNumber, password, confirmPassword } = createUserDto;
+//   //   const existingUser = this.users.find(user => user.mobileNumber === createUserDto.mobileNumber);
+//   //   if (existingUser) {
+//   //     throw new BadRequestException('Mobile number already in use');
+//   //   }
+
+//   //   if (password !== confirmPassword) {
+//   //     throw new BadRequestException('Passwords do not match');
+//   //   }
+
+//   //   const hashedPassword = await bcrypt.hash(password, 10);
+
+//   //   const user = new User({
+//   //     mobileNumber,
+//   //     password: hashedPassword,
+//   //   });
+
+//   //   return user.save();
+//   // }
+// // }
+
+// import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 // import { User } from './entities/user.entity';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
 // @Injectable()
 // export class UserService {
-//   constructor(
-//     @InjectModel(User)
-//     private readonly userModel: typeof User
-//   ) {}
+//   private users: User[] = []; // Simulated in-memory database
 
-//   async create(createUserDto: CreateUserDto): Promise<User> {
-//     return this.userModel.create(createUserDto);
-//   }
+//   // async createUser(createUserDto: CreateUserDto): Promise<User> {
+//   //   const existingUser = this.users.find(user => user.mobileNumber === createUserDto.mobileNumber);
+//   //   if (existingUser) {
+//   //     throw new BadRequestException('Mobile number already in use');
+//   //   }
 
-//   async findAll(): Promise<User[]> {
-//     return this.userModel.findAll();
-//   }
+//   //   const user = new User();
+//   //   user.mobileNumber = createUserDto.mobileNumber;
+//   //   user.password = createUserDto.password;
+//   //   this.users.push(user);
+//   //   return user;
+//   // }
 
-//   async findOne(id: string): Promise<User> {
-//     return this.userModel.findByPk(id);
-//   }
+//   async createUser(createUserDto: CreateUserDto): Promise<User> {
+//     const { mobileNumber, password, confirmPassword } = createUserDto;
+//     const existingUser = this.users.find(user => user.mobileNumber === createUserDto.mobileNumber);
+//     if (existingUser) {
+//       throw new BadRequestException('Mobile number already in use');
+//     }
 
-//   async update(id: string, updateUserDto: UpdateUserDto): Promise<[number, User[]]> {
-//     return this.userModel.update(updateUserDto, {
-//       where: { id },
-//       returning: true
+//     if (password !== confirmPassword) {
+//       throw new BadRequestException('Passwords do not match');
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const user = new User({
+//       mobileNumber,
+//       password: hashedPassword,
 //     });
+
+//     return user.save();
 //   }
 
-//   async remove(id: string): Promise<number> {
-//     return this.userModel.destroy({ where: { id } });
+//   findByMobileNumber(mobileNumber: string): User | undefined {
+//     return this.users.find(user => user.mobileNumber === mobileNumber);
+//   }
+
+//   findAll(): User[] {
+//     return this.users;
+//   }
+
+//   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+//     const user = await this.users.findByPk(id);
+//     if (!user) {
+//       throw new NotFoundException('User not found');
+//     }
+  
+//     if (updateUserDto.mobileNumber) {
+//       user.mobileNumber = updateUserDto.mobileNumber;
+//     }
+//     if (updateUserDto.password) {
+//       user.password = updateUserDto.password;
+//     }
+  
+//     await user.save();
+//     return user;
+//   }
+
+//   remove(id: string): void {
+//     // Implement remove logic
 //   }
 // }
 
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+
+
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User)
-    private readonly userModel: typeof User
+    private readonly userModel: typeof User,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
-    try {
-      // Hash the password before storing it
-      createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
-      await this.userModel.create(createUserDto);
-      return { message: 'User created successfully' };
-    } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
-      }
-      throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
+  
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const { mobileNumber, password, confirmPassword } = createUserDto;
+    const existingUser = await this.userModel.findOne({ where: { mobileNumber } });
+    if (existingUser) {
+      throw new BadRequestException('Mobile number already in use');
     }
+
+    if (password !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await this.userModel.create({
+      mobileNumber,
+      password: hashedPassword,
+    });
+
+    return user;
   }
 
+  async findByMobileNumber(mobileNumber: string): Promise<User | null> {
+    return this.userModel.findOne({
+      where: { mobileNumber: mobileNumber.toString() }, // Ensure mobileNumber is a string
+    });
+  }
+
+  // Find all users
   async findAll(): Promise<User[]> {
-    try {
-      return await this.userModel.findAll();
-    } catch (error) {
-      throw new HttpException('Failed to retrieve users', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.userModel.findAll();
   }
 
-  // Updated to find user by mobileNumber
-  async findByMobileNumber(mobileNumber: string): Promise<User> {
-    try {
-      const user = await this.userModel.findOne({ where: { mobileNumber } });
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-      return user;
-    } catch (error) {
-      throw new HttpException('Failed to retrieve user', HttpStatus.INTERNAL_SERVER_ERROR);
+  // Update user details
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userModel.findByPk(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+    
+    // Update fields
+    if (updateUserDto.mobileNumber) {
+      user.mobileNumber = updateUserDto.mobileNumber;
+    }
+    if (updateUserDto.password) {
+      user.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+    
+    await user.save();
+    return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<{ message: string }> {
-    try {
-      if (updateUserDto.password) {
-        const salt = await bcrypt.genSalt();
-        updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
-      }
-
-      const [affectedRows] = await this.userModel.update(updateUserDto, {
-        where: { id },
-        returning: true,
-      });
-      if (affectedRows === 0) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-      return { message: 'User updated successfully' };
-    } catch (error) {
-      throw new HttpException('Failed to update user', HttpStatus.INTERNAL_SERVER_ERROR);
+  // Remove a user by ID
+  async remove(id: string): Promise<void> {
+    const user = await this.userModel.findByPk(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+    
+    await user.destroy();
   }
 
-  async remove(id: string): Promise<{ message: string }> {
-    try {
-      const deletedRows = await this.userModel.destroy({ where: { id } });
-      if (deletedRows === 0) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-      return { message: 'User deleted successfully' };
-    } catch (error) {
-      throw new HttpException('Failed to delete user', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+  
 }

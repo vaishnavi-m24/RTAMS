@@ -52,7 +52,7 @@ export class Owner extends Model<Owner> {
     allowNull: false,
     defaultValue: 'Maharashtra',
   })
-  state: string;
+  state1: string;
 
   @IsString()
   @Length(6, 6, { message: 'Pincode must be exactly 6 digits' })
@@ -79,4 +79,15 @@ export class Owner extends Model<Owner> {
     unique: true,
   })
   aadharNo: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+    validate: {
+      isEmail: true,
+    },
+  })
+  email: string;
+
+
 }

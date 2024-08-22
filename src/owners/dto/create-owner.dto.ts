@@ -1,4 +1,6 @@
-import { IsString, IsNotEmpty, IsMobilePhone, Length, IsPostalCode } from 'class-validator';
+
+import { IsString, IsNotEmpty, IsOptional, IsMobilePhone, Length,  IsEmail } from 'class-validator';
+
 
 export class CreateOwnerDto {
   @IsString()
@@ -6,8 +8,8 @@ export class CreateOwnerDto {
   firstName: string;
 
   @IsString()
-  @IsNotEmpty()
-  middleName: string;
+  @IsOptional()
+  middleName?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -23,18 +25,23 @@ export class CreateOwnerDto {
 
   @IsString()
   @IsNotEmpty()
-  state: string;
+  state1: string;
 
-  @IsPostalCode('IN')
+  @IsString()
+  @Length(6, 6, { message: 'Pincode must be exactly 6 digits' })
   @IsNotEmpty()
   pincode: string;
 
-  @IsMobilePhone('en-IN')
+  @IsEmail({}, { message: 'Invalid email address' })
+  @IsNotEmpty()
+  email: string;
+
+  @IsMobilePhone('en-IN', { strictMode: true }, { message: 'Contact number must be an Indian phone number' })
   @IsNotEmpty()
   contactNo: string;
 
   @IsString()
-  @Length(12, 12, { message: 'Aadhar number must be 12 digits long' })
+  @Length(12, 12, { message: 'Aadhar number must be exactly 12 digits' })
   @IsNotEmpty()
   aadharNo: string;
 }
