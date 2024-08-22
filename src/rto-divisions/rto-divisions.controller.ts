@@ -12,10 +12,10 @@ export class RtoDivisionController {
     return this.rtoDivisionService.create(createRtoDivisionDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rtoDivisionService.findOne(id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.rtoDivisionService.findOne(id);
+  // }
 
   @Get()
   findAll() {
@@ -33,10 +33,7 @@ export class RtoDivisionController {
   }
 
   @Get('names')
-  async getDivisionNames(): Promise<{ divisionName: string }[]> {
-    const divisions = await this.rtoDivisionService.findAllDivisionNames();
-    return divisions.map(division => ({
-      divisionName: division.divisionName,
-    }));
+  async findAllDivisionNames(): Promise<any> {
+    return await this.rtoDivisionService.findAllDivisionNames();
   }
 }

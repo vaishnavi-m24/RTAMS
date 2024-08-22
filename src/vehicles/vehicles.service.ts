@@ -27,6 +27,7 @@ export class VehicleService {
       });
 
       if (!vinValidationResult.valid) {
+        console.log(vinValidationResult);
         throw new HttpException(vinValidationResult.message, HttpStatus.BAD_REQUEST);
       }
 

@@ -29,17 +29,17 @@ export class RtoDivisionService {
     }
   }
 
-  async findOne(id: string): Promise<RtoDivision> {
-    try {
-      const rtoDivision = await this.rtoDivisionModel.findByPk(id);
-      if (!rtoDivision) {
-        throw new HttpException('RTO division not found', HttpStatus.NOT_FOUND);
-      }
-      return rtoDivision;
-    } catch (error) {
-      throw new HttpException('Failed to retrieve RTO division', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+  // async findOne(id: string): Promise<RtoDivision> {
+  //   try {
+  //     const rtoDivision = await this.rtoDivisionModel.findByPk(id);
+  //     if (!rtoDivision) {
+  //       throw new HttpException('RTO division not found', HttpStatus.NOT_FOUND);
+  //     }
+  //     return rtoDivision;
+  //   } catch (error) {
+  //     throw new HttpException('Failed to retrieve RTO division', HttpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+  // }
 
   async update(id: string, updateRtoDivisionDto: UpdateRTODivisionDto): Promise<{ message: string }> {
     try {
@@ -68,13 +68,10 @@ export class RtoDivisionService {
     }
   }
 
-  async findAllDivisionNames(): Promise<RtoDivision[]> {
+  async findAllDivisionNames(): Promise<string[]> {
     try {
-      // Use await to ensure the promise resolves before continuing
-      const divisions = await this.rtoDivisionModel.findAll({
-        attributes: ['divisionName'],
-      });
-      return divisions;
+      const divisions = await this.rtoDivisionModel.findAll();
+      return divisions.map((division) => division.divisionName);
     } catch (error) {
       throw new Error('Failed to retrieve RTO division');
     }

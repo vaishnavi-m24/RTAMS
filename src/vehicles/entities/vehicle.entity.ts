@@ -50,7 +50,7 @@ export class Vehicle extends Model<Vehicle> {
 
   @IsEnum(FuelType, { message: 'Invalid fuel type' })
   @Column({
-    type: DataType.ENUM('petrol', 'diesel', 'CNG', 'LPG', 'electric'),
+    type: DataType.ENUM('Petrol', 'Diesel', 'CNG', 'LPG', 'Electric'),
     allowNull: false,
   })
   fuelType: FuelType;
