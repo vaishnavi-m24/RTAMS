@@ -14,7 +14,7 @@ export class AuthService {
 
   async validateUser(mobileNumber: string, pass: string): Promise<any> {
     const user = await this.userService.findByMobileNumber(mobileNumber);
-    if (user && await bcrypt.compare(pass, user.password)) { // Use bcrypt to compare passwords
+    if (user && await bcrypt.compare(pass, user.password)) { // Using bcrypt to compare passwords
       const { password, ...result } = user;
       return result;
     }
