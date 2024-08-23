@@ -125,19 +125,45 @@ export class UserService {
   ) {}
 
   
+  // async createUser(createUserDto: CreateUserDto): Promise<User> {
+  //   const { mobileNumber, password, confirmPassword } = createUserDto;
+  //   const existingUser = await this.userModel.findOne({ where: { mobileNumber } });
+  //   if (existingUser) {
+  //     throw new BadRequestException('Mobile number already in use');
+  //   }
+
+  //   if (password !== confirmPassword) {
+  //     throw new BadRequestException('Passwords do not match');
+  //   }
+
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+
+  //   const user = await this.userModel.create({
+  //     mobileNumber,
+  //     password: hashedPassword,
+  //   });
+
+  //   return user;
+  // }
+
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { mobileNumber, password, confirmPassword } = createUserDto;
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    // Check if the mobile number is already taken
     const existingUser = await this.userModel.findOne({ where: { mobileNumber } });
     if (existingUser) {
       throw new BadRequestException('Mobile number already in use');
     }
 
-    if (password !== confirmPassword) {
-      throw new BadRequestException('Passwords do not match');
-    }
-
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create the user
     const user = await this.userModel.create({
       mobileNumber,
       password: hashedPassword,
@@ -185,6 +211,4 @@ export class UserService {
     
     await user.destroy();
   }
-
-  
 }

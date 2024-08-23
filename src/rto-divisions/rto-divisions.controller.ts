@@ -22,6 +22,7 @@ export class RtoDivisionController {
     return this.rtoDivisionService.findAll();
   }
 
+  
   @Put(':id')
   update(@Param('id') id: string, @Body() updateRtoDivisionDto: UpdateRTODivisionDto) {
     return this.rtoDivisionService.update(id, updateRtoDivisionDto);
