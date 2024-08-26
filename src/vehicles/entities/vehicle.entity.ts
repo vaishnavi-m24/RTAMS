@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IsString, Length, IsEnum, Matches, ValidateIf } from 'class-validator';
+import { IsString, Length, IsEnum, Matches, ValidateIf ,IsOptional } from 'class-validator';
 import { Owner } from '../../owners/entities/owner.entity';
 import { RtoDivision } from '../../rto-divisions/entities/rto-division.entity';
 
@@ -92,6 +92,14 @@ export class Vehicle extends Model<Vehicle> {
   @BelongsTo(() => RtoDivision)
   division: RtoDivision;
 
+  // @IsString()
+  // @Column({
+  //   type: DataType.STRING,
+  //   allowNull: false,
+  //   unique: true,
+  // })
+  // registrationNumber: string;
+  @IsOptional()
   @IsString()
   @Column({
     type: DataType.STRING,
@@ -99,4 +107,5 @@ export class Vehicle extends Model<Vehicle> {
     unique: true,
   })
   registrationNumber: string;
+
 }

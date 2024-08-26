@@ -1,5 +1,5 @@
 
-import { IsString, IsNotEmpty, IsDateString, IsEnum, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, IsEnum, Matches, IsOptional, IsNumber } from 'class-validator';
 import { FuelType } from '../entities/vehicle.entity';
 
 export class CreateVehicleDto {
@@ -36,6 +36,10 @@ export class CreateVehicleDto {
   rtoDivisionId: number;
 
   @IsString()
+  @IsOptional()
+  registrationNumber?: string;
+
+  @IsNumber()
   @IsNotEmpty()
-  registrationNumber: string;
+  ownerId: number;
 }
