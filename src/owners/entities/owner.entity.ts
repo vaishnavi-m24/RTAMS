@@ -182,11 +182,11 @@ export class Owner extends Model<Owner> {
   })
   email: string;
 
-  // Hash the Aadhaar number before creating or updating the record
-  @BeforeCreate
-  @BeforeUpdate
-  static async hashAadhar(instance: Owner) {
-    const salt = await bcrypt.genSalt(10);
-    instance.aadharNo = await bcrypt.hash(instance.aadharNo, salt);
-  }
+  // // Hash the Aadhaar number before creating or updating the record
+  // @BeforeCreate
+  // @BeforeUpdate
+  // static async hashAadhar(instance: Owner) {
+  //   const salt = await bcrypt.genSalt(10);
+  //   instance.aadharNo = await bcrypt.hash(instance.aadharNo, salt);
+  // }
 }

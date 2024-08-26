@@ -36,7 +36,7 @@ export class CreateOwnerDto {
   @IsNotEmpty()
   email: string;
 
-  @IsMobilePhone('en-IN', { strictMode: true }, { message: 'Contact number must be an Indian phone number' })
+  @IsMobilePhone('en-IN', { strictMode: false }, { message: 'Contact number must be an Indian phone number' })
   @IsNotEmpty()
   contactNo: string;
 

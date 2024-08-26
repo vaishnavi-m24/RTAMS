@@ -11,10 +11,12 @@ export class OwnerService {
     private readonly ownerModel: typeof Owner
   ) {}
 
-  async create(createOwnerDto: CreateOwnerDto): Promise<{ message: string }> {
+  async create(createOwnerDto: CreateOwnerDto): Promise<{ id: number; message: string }> {
     try {
-      await this.ownerModel.create(createOwnerDto);
-      return { message: 'Owner created successfully' };
+      //await this.ownerModel.create(createOwnerDto);
+      const newOwner = await this.ownerModel.create(createOwnerDto);
+      return { id: newOwner.id, 
+        message: 'Owner created successfully', };
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
         throw new HttpException('Owner with this contact number or Aadhar number already exists', HttpStatus.BAD_REQUEST);
