@@ -9,16 +9,16 @@ export class UpdateOwnershipHistoryDto {
   @IsOptional()
   registrationNumber?: string;
 
-  @IsDateString()
+  @IsString()
   @IsOptional()
   ownershipStartDate?: Date;
 
-  @IsDateString()
+  @IsString()
   @IsOptional()
   ownershipEndDate?: Date;
 
-  @IsOptional()
-  vehicleId?: number;
+  // @IsOptional()
+  // vehicleId?: number;
 
   @IsOptional()
   ownerId?: number;

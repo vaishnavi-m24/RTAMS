@@ -27,20 +27,20 @@ export class OwnershipHistory extends Model<OwnershipHistory> {
   })
   registrationNumber: string;
 
-  @IsDateString()
+  @IsString()
   @Column({
     type: DataType.DATE,
     allowNull: false,
   })
   ownershipStartDate: Date;
 
-  @IsDateString()
+  @IsString()
   @Column({
     type: DataType.DATE,
     allowNull: true,
     defaultValue: null
   })
-  ownershipEndDate: Date;
+  ownershipEndDate?: Date;
 
   @BelongsTo(() => Vehicle)
   vehicle: Vehicle;

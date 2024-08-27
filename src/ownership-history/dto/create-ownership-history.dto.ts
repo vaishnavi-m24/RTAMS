@@ -9,12 +9,11 @@ export class CreateOwnershipHistoryDto {
   @IsNotEmpty()
   registrationNumber: string;
 
-  @IsDateString()
+  @IsString()
   @IsNotEmpty()
   ownershipStartDate: Date;
 
-  @IsDateString()
-  @IsNotEmpty()
+  @IsString()
   ownershipEndDate?: Date;
 
   // @IsNotEmpty()
