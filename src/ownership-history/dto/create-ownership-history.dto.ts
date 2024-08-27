@@ -17,8 +17,8 @@ export class CreateOwnershipHistoryDto {
   @IsNotEmpty()
   ownershipEndDate?: Date;
 
-  @IsNotEmpty()
-  vehicleId: number;
+  // @IsNotEmpty()
+  // vehicleId: number;
 
   @IsNotEmpty()
   ownerId: number;

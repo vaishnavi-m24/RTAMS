@@ -19,6 +19,7 @@ export class OwnershipHistory extends Model<OwnershipHistory> {
   })
   ownerName: string;
 
+  @ForeignKey(() => Vehicle)
   @IsString()
   @Column({
     type: DataType.STRING,
@@ -37,15 +38,9 @@ export class OwnershipHistory extends Model<OwnershipHistory> {
   @Column({
     type: DataType.DATE,
     allowNull: true,
+    defaultValue: null
   })
   ownershipEndDate: Date;
-
-  @ForeignKey(() => Vehicle)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  vehicleId: number;
 
   @BelongsTo(() => Vehicle)
   vehicle: Vehicle;
