@@ -92,7 +92,6 @@ export class OwnershipHistoryService {
       };
 
       await this.ownershipHistoryModel.create(ownershipHistory);
-      await this.ownershipHistoryModel.create(ownershipHistory);
 
       return { message: 'Ownership history created successfully' };
     } catch (error) {
