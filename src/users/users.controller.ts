@@ -8,20 +8,6 @@ import { User } from './entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Post('signup')
-  // async signup(@Body() createUserDto: CreateUserDto): Promise<User> {
-  //   // Validate that passwords match
-  //   if (createUserDto.password !== createUserDto.confirmPassword) {
-  //     throw new BadRequestException('Password and Confirm Password do not match');
-  //   }
-
-  //   // Check if the mobile number is already taken
-  //   const existingUser = await this.userService.findByMobileNumber(createUserDto.mobileNumber);
-  //   if (existingUser) {
-  //     throw new BadRequestException('Mobile number already in use');
-  //   }
-  //   return this.userService.createUser(createUserDto);
-  // }
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto): Promise<User> {
     // Validate that passwords match

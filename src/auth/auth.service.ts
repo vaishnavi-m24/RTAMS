@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -20,9 +20,13 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { mobileNumber: user.mobileNumber, sub: user.userId };
+    const payload = { mobileNumber: user.mobileNumber, sub: user.userId, role:user.role };
+    const accessToeken = this.jwtService.sign(payload);
+    const refresh_token = this.jwtService.sign(payload, {expiresIn: '7d'});//refresh token
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token:accessToeken,
+      refresh_token:refresh_token,
     };
   }
+  
 }
