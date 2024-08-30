@@ -33,10 +33,11 @@
 //   }
 // }
 
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete ,Req} from '@nestjs/common';
 import { OwnershipHistoryService } from './ownership-history.service';
 import { CreateOwnershipHistoryDto } from './dto/create-ownership-history.dto';
 import { UpdateOwnershipHistoryDto } from './dto/update-ownership-history.dto';
+import {Request} from 'express';
 
 @Controller('ownership-history')
 export class OwnershipHistoryController {
@@ -48,13 +49,15 @@ export class OwnershipHistoryController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ownershipHistoryService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req : Request) {
+    const user =  req.user;
+    return this.ownershipHistoryService.findOne(id,user);
   }
 
   @Get()
-  findAll() {
-    return this.ownershipHistoryService.findAll();
+  findAll(@Req() req: Request) {
+    const user = req.user;
+    return this.ownershipHistoryService.findAll(user);
   }
 
   @Put(':id')

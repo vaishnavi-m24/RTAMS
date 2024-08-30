@@ -84,16 +84,13 @@ export class UserController {
     if (existingAadhar) {
       throw new BadRequestException('Aadhar number already in use');
     }
-
     return this.userService.createUser(createUserDto);
   }
-
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin','user')
+  @Roles('admin', 'user')
   @Get(':mobileNumber')
-  findByMobileNumber(@Param('mobileNumber') mobileNumber: string, @Request() req) {
-    if(req.user.role === 'user' && req.user.mobileNumber!=mobileNumber)
-    {
+  async findByMobileNumber(@Param('mobileNumber') mobileNumber: string, @Request() req) {
+    if (req.user.role === 'user' && req.user.mobileNumber !== mobileNumber) {
       throw new BadRequestException('You have access to your own profile only');
     }
     return this.userService.findByMobileNumber(mobileNumber);
@@ -102,26 +99,61 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get()
-  findAll(){
-    return this.userService .findAll();
+  async findAll() {
+    return this.userService.findAll();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin','user')
+  @Roles('admin', 'user')
   @Put(':id')
-  update(@Param('id') id:string,  @Body() updateUserDto: UpdateUserDto, @Request() req){
-    if(req.user.role === 'user' && req.user.userId !== +id){
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req) {
+    if (req.user.role === 'user' && req.user.id !== +id) {
       throw new BadRequestException('You can update your own profile only');
     }
     return this.userService.update(id, updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard,RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id:string){
+  async remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
+}
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('admin','user')
+  // @Get(':mobileNumber')
+  // findByMobileNumber(@Param('mobileNumber') mobileNumber: string, @Request() req) {
+  //   if(req.user.role === 'user' && req.user.mobileNumber!=mobileNumber)
+  //   {
+  //     throw new BadRequestException('You have access to your own profile only');
+  //   }
+  //   return this.userService.findByMobileNumber(mobileNumber);
+  // }
+
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('admin')
+  // @Get()
+  // findAll(){
+  //   return this.userService .findAll();
+  // }
+
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('admin','user')
+  // @Put(':id')
+  // update(@Param('id') id:string,  @Body() updateUserDto: UpdateUserDto, @Request() req){
+  //   if(req.user.role === 'user' && req.user.userId !== +id){
+  //     throw new BadRequestException('You can update your own profile only');
+  //   }
+  //   return this.userService.update(id, updateUserDto);
+  // }
+
+  // @UseGuards(JwtAuthGuard,RolesGuard)
+  // @Roles('admin')
+  // @Delete(':id')
+  // remove(@Param('id') id:string){
+  //   return this.userService.remove(id);
+  // }
 
   // @Put(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -132,4 +164,3 @@ export class UserController {
   // remove(@Param('id') id: string) {
   //   return this.userService.remove(id);
   // }
-}

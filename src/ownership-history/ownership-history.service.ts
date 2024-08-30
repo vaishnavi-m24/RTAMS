@@ -68,6 +68,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { OwnershipHistory } from './entities/ownership-history.entity';
 import { CreateOwnershipHistoryDto } from './dto/create-ownership-history.dto';
 import { UpdateOwnershipHistoryDto } from './dto/update-ownership-history.dto';
+import {User } from  '../users/entities/user.entity'
 import * as moment from 'moment';
 
 @Injectable()
@@ -100,19 +101,29 @@ export class OwnershipHistoryService {
     }
   }
 
-  async findAll(): Promise<OwnershipHistory[]> {
+  async findAll(user: User): Promise<OwnershipHistory[]> {
     try {
-      return await this.ownershipHistoryModel.findAll();
+      if(user.role === 'admin'){
+        return await this.ownershipHistoryModel.findAll();
+      }
+      else{
+        return await this.ownershipHistoryModel.findAll({
+          where:{ownerId :user.id},
+        });
+      }
     } catch (error) {
       throw new HttpException('Failed to retrieve ownership histories', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async findOne(id: string): Promise<OwnershipHistory> {
+  async findOne(id: string,user:User): Promise<OwnershipHistory> {
     try {
       const ownershipHistory = await this.ownershipHistoryModel.findByPk(id);
       if (!ownershipHistory) {
         throw new HttpException('Ownership history not found', HttpStatus.NOT_FOUND);
+      }
+      if(user.role !== 'admin' && this.ownershipHistoryModel.findByPk(id)){
+        throw new HttpException('Access denied',HttpStatus.FORBIDDEN);
       }
       return ownershipHistory;
     } catch (error) {

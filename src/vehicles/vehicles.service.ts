@@ -5,6 +5,7 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { RtoDivision } from '../rto-divisions/entities/rto-division.entity';
 import { vin } from '@form-validation/validator-vin';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class VehicleService {
@@ -100,19 +101,32 @@ export class VehicleService {
     return nextNumber.toString().padStart(4, '0');
   }
 
-  async findAll(): Promise<Vehicle[]> {
+  async findAll(user:User): Promise<Vehicle[]> {
     try {
-      return await this.vehicleModel.findAll();
+      if(user.role === 'admin'){
+        return await this.vehicleModel.findAll();
+      }
+      else{
+        return await this.vehicleModel.findAll({
+          where: {ownerId: user.id},
+        });
+      }
+      
     } catch (error) {
       throw new HttpException('Failed to retrieve vehicles', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async findOne(id: string): Promise<Vehicle> {
+  async findOne(id: string, user: User): Promise<Vehicle> {
     try {
       const vehicle = await this.vehicleModel.findByPk(id);
       if (!vehicle) {
         throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
+      }
+  
+      if(user.role !=='admin' && vehicle.ownerId !== user.id)
+      {
+        throw new HttpException('Access denied',HttpStatus.FORBIDDEN);
       }
       return vehicle;
     } catch (error) {
