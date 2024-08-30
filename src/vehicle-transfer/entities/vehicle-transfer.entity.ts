@@ -1,7 +1,7 @@
 import {Table,Column,Model,DataType,ForeignKey,BelongsTo,} from 'sequelize-typescript';
   import { IsDateString } from 'class-validator';
   import { Vehicle } from '../../vehicles/entities/vehicle.entity';
-  import { Owner } from '../../owners/entities/owner.entity';
+  import { User } from '../../users/entities/user.entity';
   
   @Table({ tableName: 'vehicle_transfers' })
   export class VehicleTransfer extends Model<VehicleTransfer> {
@@ -19,25 +19,25 @@ import {Table,Column,Model,DataType,ForeignKey,BelongsTo,} from 'sequelize-types
     })
     vehicleTransferDate: Date;
   
-    @ForeignKey(() => Owner)
+    @ForeignKey(() => User)
     @Column({
       type: DataType.INTEGER,
       allowNull: false,
     })
     currentOwnerId: number;
   
-    @BelongsTo(() => Owner, 'currentOwnerId')
-    currentOwner: Owner;
+    @BelongsTo(() => User, 'currentOwnerId')
+    currentOwner: User;
   
-    @ForeignKey(() => Owner)
+    @ForeignKey(() => User)
     @Column({
       type: DataType.INTEGER,
       allowNull: false,
     })
     newOwnerId: number;
   
-    @BelongsTo(() => Owner, 'newOwnerId')
-    newOwner: Owner;
+    @BelongsTo(() => User, 'newOwnerId')
+    newOwner: User;
   
     @ForeignKey(() => Vehicle)
     @Column({

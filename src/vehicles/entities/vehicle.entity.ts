@@ -1,6 +1,6 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { IsString, Length, IsEnum, Matches, ValidateIf ,IsOptional } from 'class-validator';
-import { Owner } from '../../owners/entities/owner.entity';
+import { IsString, IsEnum, Matches, ValidateIf ,IsOptional } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
 import { RtoDivision } from '../../rto-divisions/entities/rto-division.entity';
 
 export enum FuelType {
@@ -72,15 +72,15 @@ export class Vehicle extends Model<Vehicle> {
   })
   vinNumber: string;
 
-  @ForeignKey(() => Owner)
+  @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   ownerId: number;
 
-  @BelongsTo(() => Owner)
-  owner: Owner;
+  @BelongsTo(() => User)
+  user: User;
 
   @ForeignKey(() => RtoDivision)
   @Column({
@@ -92,13 +92,6 @@ export class Vehicle extends Model<Vehicle> {
   @BelongsTo(() => RtoDivision)
   division: RtoDivision;
 
-  // @IsString()
-  // @Column({
-  //   type: DataType.STRING,
-  //   allowNull: false,
-  //   unique: true,
-  // })
-  // registrationNumber: string;
   @IsOptional()
   @IsString()
   @Column({

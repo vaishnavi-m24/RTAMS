@@ -6,7 +6,6 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { OwnershipHistoryModule } from './ownership-history/ownership-history.module';
 import { VehicleTransferModule } from './vehicle-transfer/vehicle-transfer.module';
 import { RtoDivisionsModule } from './rto-divisions/rto-divisions.module';
-import { OwnersModule } from './owners/owners.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { databaseConfig } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
@@ -16,7 +15,7 @@ import { FuelTypeModule } from './fuel/fuel.module';
 
 
 @Module({
-  imports: [SequelizeModule.forRoot(databaseConfig),UsersModule, VehiclesModule, OwnershipHistoryModule, VehicleTransferModule, RtoDivisionsModule, OwnersModule, AuthModule,User,FuelTypeModule],
+  imports: [SequelizeModule.forRoot(databaseConfig),UsersModule, VehiclesModule, OwnershipHistoryModule, VehicleTransferModule, RtoDivisionsModule, AuthModule,User,FuelTypeModule],
   controllers: [AppController],
   providers: [AppService],
 })

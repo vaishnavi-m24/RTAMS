@@ -1,113 +1,85 @@
-// // import { Injectable, BadRequestException } from '@nestjs/common';
-// // import { InjectModel } from '@nestjs/sequelize';
-// // import { User } from './entities/user.entity';
-// // import { CreateUserDto } from './dto/create-user.dto';
-// import * as bcrypt from 'bcrypt';
-
-
-// // @Injectable()
-// // export class UserService {
-// //   constructor(
-// //     @InjectModel(User)
-// //     private userModel: typeof User,
-// //   ) {}
-
-  
-//   // async createUser(createUserDto: CreateUserDto): Promise<User> {
-//   //   const { mobileNumber, password, confirmPassword } = createUserDto;
-//   //   const existingUser = this.users.find(user => user.mobileNumber === createUserDto.mobileNumber);
-//   //   if (existingUser) {
-//   //     throw new BadRequestException('Mobile number already in use');
-//   //   }
-
-//   //   if (password !== confirmPassword) {
-//   //     throw new BadRequestException('Passwords do not match');
-//   //   }
-
-//   //   const hashedPassword = await bcrypt.hash(password, 10);
-
-//   //   const user = new User({
-//   //     mobileNumber,
-//   //     password: hashedPassword,
-//   //   });
-
-//   //   return user.save();
-//   // }
-// // }
 
 // import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+// import { InjectModel } from '@nestjs/sequelize';
+// import * as bcrypt from 'bcrypt';
 // import { User } from './entities/user.entity';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
 // @Injectable()
 // export class UserService {
-//   private users: User[] = []; // Simulated in-memory database
+//   constructor(
+//     @InjectModel(User)
+//     private readonly userModel: typeof User,
+//   ) {}
 
-//   // async createUser(createUserDto: CreateUserDto): Promise<User> {
-//   //   const existingUser = this.users.find(user => user.mobileNumber === createUserDto.mobileNumber);
-//   //   if (existingUser) {
-//   //     throw new BadRequestException('Mobile number already in use');
-//   //   }
-
-//   //   const user = new User();
-//   //   user.mobileNumber = createUserDto.mobileNumber;
-//   //   user.password = createUserDto.password;
-//   //   this.users.push(user);
-//   //   return user;
-//   // }
 
 //   async createUser(createUserDto: CreateUserDto): Promise<User> {
 //     const { mobileNumber, password, confirmPassword } = createUserDto;
-//     const existingUser = this.users.find(user => user.mobileNumber === createUserDto.mobileNumber);
-//     if (existingUser) {
-//       throw new BadRequestException('Mobile number already in use');
-//     }
 
+//     // Check if passwords match
 //     if (password !== confirmPassword) {
 //       throw new BadRequestException('Passwords do not match');
 //     }
 
+//     // Check if the mobile number is already taken
+//     const existingUser = await this.userModel.findOne({ where: { mobileNumber } });
+//     if (existingUser) {
+//       throw new BadRequestException('Mobile number already in use');
+//     }
+
+//     // Hash the password
 //     const hashedPassword = await bcrypt.hash(password, 10);
 
-//     const user = new User({
+//     // Create the user
+//     const user = await this.userModel.create({
 //       mobileNumber,
 //       password: hashedPassword,
 //     });
 
-//     return user.save();
+//     return user;
 //   }
 
-//   findByMobileNumber(mobileNumber: string): User | undefined {
-//     return this.users.find(user => user.mobileNumber === mobileNumber);
+//   async findByMobileNumber(mobileNumber: string): Promise<User | null> {
+//     return this.userModel.findOne({
+//       where: { mobileNumber: mobileNumber.toString() }, // Ensure mobileNumber is a string
+//     });
 //   }
 
-//   findAll(): User[] {
-//     return this.users;
+//   // Find all users
+//   async findAll(): Promise<User[]> {
+//     return this.userModel.findAll();
 //   }
 
+//   // Update user details
 //   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-//     const user = await this.users.findByPk(id);
+//     const user = await this.userModel.findByPk(id);
 //     if (!user) {
 //       throw new NotFoundException('User not found');
 //     }
-  
+    
+//     // Update fields
 //     if (updateUserDto.mobileNumber) {
 //       user.mobileNumber = updateUserDto.mobileNumber;
 //     }
 //     if (updateUserDto.password) {
-//       user.password = updateUserDto.password;
+//       user.password = await bcrypt.hash(updateUserDto.password, 10);
 //     }
-  
+    
 //     await user.save();
 //     return user;
 //   }
 
-//   remove(id: string): void {
-//     // Implement remove logic
+//   // Remove a user by ID
+//   async remove(id: string): Promise<void> {
+//     const user = await this.userModel.findByPk(id);
+//     if (!user) {
+//       throw new NotFoundException('User not found');
+//     }
+    
+//     await user.destroy();
 //   }
 // }
-
 
 
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
@@ -124,57 +96,84 @@ export class UserService {
     private readonly userModel: typeof User,
   ) {}
 
-  
-  // async createUser(createUserDto: CreateUserDto): Promise<User> {
-  //   const { mobileNumber, password, confirmPassword } = createUserDto;
-  //   const existingUser = await this.userModel.findOne({ where: { mobileNumber } });
-  //   if (existingUser) {
-  //     throw new BadRequestException('Mobile number already in use');
-  //   }
-
-  //   if (password !== confirmPassword) {
-  //     throw new BadRequestException('Passwords do not match');
-  //   }
-
-  //   const hashedPassword = await bcrypt.hash(password, 10);
-
-  //   const user = await this.userModel.create({
-  //     mobileNumber,
-  //     password: hashedPassword,
-  //   });
-
-  //   return user;
-  // }
-
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { mobileNumber, password, confirmPassword } = createUserDto;
+    const {
+      mobileNumber,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      streetName,
+      city,
+      state1,
+      pincode,
+      email,
+      aadharNumber,
+      role = mobileNumber === '9579529955'?'admin':'user',
+    } = createUserDto;
 
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      throw new BadRequestException('Passwords do not match');
-    }
-
-    // Check if the mobile number is already taken
+    // Check if the mobile number, email, or Aadhar number is already taken
     const existingUser = await this.userModel.findOne({ where: { mobileNumber } });
     if (existingUser) {
       throw new BadRequestException('Mobile number already in use');
     }
 
+    const existingEmail = await this.userModel.findOne({ where: { email } });
+    if (existingEmail) {
+      throw new BadRequestException('Email already in use');
+    }
+
+    const existingAadhar = await this.userModel.findOne({ where: { aadharNumber } });
+    if (existingAadhar) {
+      throw new BadRequestException('Aadhar number already in use');
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    
     // Create the user
     const user = await this.userModel.create({
       mobileNumber,
       password: hashedPassword,
+      firstName,
+      middleName,
+      lastName,
+      streetName,
+      city,
+      state1,
+      pincode,
+      email,
+      aadharNumber,
+      role,
     });
 
     return user;
   }
 
+  // async updateRole(userId:number, newRole:string):Promise<void>{
+  //   const user = await this.userModel.findByPk(userId);
+  //   if(!user){
+  //     throw new NotFoundException('User not found');
+  //   }
+  //   user.role = newRole;
+  //   await user.save();
+  // }
+
   async findByMobileNumber(mobileNumber: string): Promise<User | null> {
     return this.userModel.findOne({
-      where: { mobileNumber: mobileNumber.toString() }, // Ensure mobileNumber is a string
+      where: { mobileNumber },
+    });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({
+      where: { email },
+    });
+  }
+
+  async findByAadharNumber(aadharNumber: string): Promise<User | null> {
+    return this.userModel.findOne({
+      where: { aadharNumber },
     });
   }
 
@@ -189,7 +188,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     // Update fields
     if (updateUserDto.mobileNumber) {
       user.mobileNumber = updateUserDto.mobileNumber;
@@ -197,7 +196,37 @@ export class UserService {
     if (updateUserDto.password) {
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-    
+    if (updateUserDto.firstName) {
+      user.firstName = updateUserDto.firstName;
+    }
+    if (updateUserDto.middleName) {
+      user.middleName = updateUserDto.middleName;
+    }
+    if (updateUserDto.lastName) {
+      user.lastName = updateUserDto.lastName;
+    }
+    if (updateUserDto.streetName) {
+      user.streetName = updateUserDto.streetName;
+    }
+    if (updateUserDto.city) {
+      user.city = updateUserDto.city;
+    }
+    if (updateUserDto.state1) {
+      user.state1 = updateUserDto.state1;
+    }
+    if (updateUserDto.pincode) {
+      user.pincode = updateUserDto.pincode;
+    }
+    if (updateUserDto.email) {
+      user.email = updateUserDto.email;
+    }
+    if (updateUserDto.aadharNumber) {
+      user.aadharNumber = updateUserDto.aadharNumber;
+    }
+    if (updateUserDto.role) {
+      user.role = updateUserDto.role;
+    }
+
     await user.save();
     return user;
   }
@@ -208,7 +237,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     await user.destroy();
   }
 }
