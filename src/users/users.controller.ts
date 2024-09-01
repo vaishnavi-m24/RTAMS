@@ -55,6 +55,7 @@ import { User } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import {Roles} from '../auth/roles.decorator';
+import { AdminGuard } from 'src/auth/admin.guard';
 
 @Controller('users')
 export class UserController {
@@ -84,8 +85,27 @@ export class UserController {
     if (existingAadhar) {
       throw new BadRequestException('Aadhar number already in use');
     }
-    return this.userService.createUser(createUserDto);
+
+    //assigning  role
+    const role = createUserDto.mobileNumber === '9579529955' ? 'admin' : 'user';
+    const user = await this.userService.createUser({...createUserDto,role});
+    return user;
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin','user')
+  @Get('profile')
+  async getProfile(@Request() req){
+    const mobileNumber = req.user.mobileNumber;
+
+    const userProfile = await this.userService.findByMobileNumber(mobileNumber);
+    if(!userProfile){
+      throw new  BadRequestException('User not found');
+    }    
+    return userProfile;
+  }
+    
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'user')
   @Get(':mobileNumber')

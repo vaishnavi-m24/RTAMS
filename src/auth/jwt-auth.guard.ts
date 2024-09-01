@@ -17,17 +17,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
-    if (!token) {
+    const authHeader = request.headers.authorization;
+
+    if(!authHeader || !authHeader.startsWith('Bearer')){
       throw new UnauthorizedException('Token missing');
     }
+    const result = (await super.canActivate(context)) as boolean;
 
-    try {
-      const decoded = this.jwtService.verify(token);
-      request.user = decoded;
-      return true;
-    } catch (e) {
-      throw new UnauthorizedException('Invalid token');
-    }
+    return result;
+   
+
   }
 }

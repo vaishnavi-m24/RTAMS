@@ -150,18 +150,13 @@ export class UserService {
     return user;
   }
 
-  // async updateRole(userId:number, newRole:string):Promise<void>{
-  //   const user = await this.userModel.findByPk(userId);
-  //   if(!user){
-  //     throw new NotFoundException('User not found');
-  //   }
-  //   user.role = newRole;
-  //   await user.save();
-  // }
 
   async findByMobileNumber(mobileNumber: string): Promise<User | null> {
     return this.userModel.findOne({
       where: { mobileNumber },
+      attributes:[
+        'id','mobileNumber','firstName','middleName', 'lastName','streetName','city','state1','pincode','email','aadharNumber','role','password'
+      ],
     });
   }
 

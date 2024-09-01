@@ -11,27 +11,44 @@ export class AuthService {
   ) {}
 
   async validateUser(mobileNumber: string, pass: string): Promise<any> {
-    const user = await this.userService.findByMobileNumber(mobileNumber);
-    if (user && await bcrypt.compare(pass, user.password)) { // Using bcrypt to compare passwords
-      //const { password, ...result } = user;
-      return user;
+    try{
+      const user = await this.userService.findByMobileNumber(mobileNumber);
+      console.log('user fetched',user);
+      if(!user)
+      {
+        console.error('User not found');
+        return null;
+      }
+      console.log('pass from db',user.password);
+
+      const isMatch = await bcrypt.compare(pass, user.password);
+      if(isMatch){
+        return user;
+      }
+      else{
+        console.error('Password mismatch');
+        return null;
+      }
     }
-    return null;
+    catch(error){
+      console.error("Error in validation",error);
+      throw new UnauthorizedException('validation failed');
+    }
   }
 
   async login(user: any) {
-    const adminMobNumber = '9579529955';
-    if(user.mobileNumber === adminMobNumber){
-      user.role = 'admin';
-    }
-    else{
-      user.role = 'user';
-    }
-    const payload = { mobileNumber: user.mobileNumber, sub: user.userId, role:user.role };
+    try{
+      const payload = { mobileNumber: user.mobileNumber, sub: user.userId, role:user.role };
     return {
       access_token:this.jwtService.sign(payload),
       refresh_token:this.jwtService.sign(payload,{expiresIn:'7d'}),
     };
+    }
+    catch(error)
+    {
+      console.error('Error in login',error);
+      throw new UnauthorizedException('Login failed');
+    }
   }
 
   async refreshToken(oldToken:string){

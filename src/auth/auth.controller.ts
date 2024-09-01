@@ -18,14 +18,11 @@ export class AuthController {
       const token = await this.authService.login(user);
       return { message: 'Login successful', token: token.access_token };
     } catch (error) {
-      if (error.response) {
-        throw new HttpException(error.response, error.status);
-      } else {
+     
         throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
   
-}
 
 
