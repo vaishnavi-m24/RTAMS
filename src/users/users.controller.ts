@@ -55,7 +55,7 @@ import { User } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import {Roles} from '../auth/roles.decorator';
-import { AdminGuard } from 'src/auth/admin.guard';
+
 
 @Controller('users')
 export class UserController {
@@ -63,24 +63,24 @@ export class UserController {
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto): Promise<User> {
-    // Validate that passwords match
+    // Validating that passwords match
     if (createUserDto.password !== createUserDto.confirmPassword) {
       throw new BadRequestException('Password and Confirm Password do not match');
     }
 
-    // Check if the mobile number is already taken
+    // Checking if the mobile number is already taken
     const existingUser = await this.userService.findByMobileNumber(createUserDto.mobileNumber);
     if (existingUser) {
       throw new BadRequestException('Mobile number already in use');
     }
 
-    // Check if the email is already taken
+    // Checking if the email is already taken
     const existingEmail = await this.userService.findByEmail(createUserDto.email);
     if (existingEmail) {
       throw new BadRequestException('Email already in use');
     }
 
-    // Check if the Aadhar number is already taken
+    // Checking if the Aadhar number is already taken
     const existingAadhar = await this.userService.findByAadharNumber(createUserDto.aadharNumber);
     if (existingAadhar) {
       throw new BadRequestException('Aadhar number already in use');

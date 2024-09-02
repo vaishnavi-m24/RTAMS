@@ -38,7 +38,7 @@ export class AuthService {
 
   async login(user: any) {
     try{
-      const payload = { mobileNumber: user.mobileNumber, sub: user.userId, role:user.role };
+      const payload = { mobileNumber: user.mobileNumber, sub: user.userId, role:user.role , id: user.id};
     return {
       access_token:this.jwtService.sign(payload),
       refresh_token:this.jwtService.sign(payload,{expiresIn:'7d'}),

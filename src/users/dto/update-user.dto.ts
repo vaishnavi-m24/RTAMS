@@ -8,6 +8,7 @@ export class UpdateUserDto {
   mobileNumber?: string;
   
   @IsString()
+  @IsOptional()
   @Length(6, 20, { message: 'Password must be between 6 and 20 characters' })
   @Matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,20}/, {
     message: 'Password must contain uppercase and lowercase letters, numbers, and special characters',
