@@ -30,4 +30,7 @@ export class UpdateOwnershipHistoryDto {
 
   @IsOptional()
   ownerId: number;
+
+  @IsOptional()
+  vehicleId:number;
 }

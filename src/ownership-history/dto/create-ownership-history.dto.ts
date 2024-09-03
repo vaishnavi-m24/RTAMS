@@ -19,4 +19,7 @@ export class CreateOwnershipHistoryDto {
 
   @IsNotEmpty()
   ownerId: number;
+
+  @IsNotEmpty()
+  vehicleId:number;
 }
