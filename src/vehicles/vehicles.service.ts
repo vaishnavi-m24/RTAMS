@@ -185,7 +185,7 @@ export class VehicleService {
     private readonly rtoDivisionModel: typeof RtoDivision,
   ) {}
 
-  async create(createVehicleDto: CreateVehicleDto): Promise<{ message: string; registrationNumber: string }> {
+  async create(createVehicleDto: CreateVehicleDto): Promise<{ message: string; registrationNumber: string; vehicleId:number }> {
     try {
       // Validate the VIN number
       const vinValidationResult = vin().validate({
@@ -218,7 +218,7 @@ export class VehicleService {
         registrationNumber,
       });
 
-      return { message: 'Vehicle created successfully', registrationNumber: vehicle.registrationNumber };
+      return { message: 'Vehicle created successfully', registrationNumber: vehicle.registrationNumber, vehicleId:vehicle.id };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
