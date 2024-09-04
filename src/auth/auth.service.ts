@@ -47,7 +47,7 @@ export class AuthService {
     catch(error)
     {
       console.error('Error in login',error);
-      throw new UnauthorizedException('Login failed');
+      throw new UnauthorizedException('Failed to login');
     }
   }
 
