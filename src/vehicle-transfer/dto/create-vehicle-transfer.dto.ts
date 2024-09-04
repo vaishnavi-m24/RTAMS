@@ -1,6 +1,7 @@
 import { IsDateString, IsNotEmpty } from 'class-validator';
 
 export class CreateVehicleTransferDto {
+  
   @IsDateString()
   @IsNotEmpty()
   vehicleTransferDate: Date;

@@ -19,7 +19,7 @@ export class AuthController {
       return { message: 'Login successful', token: token.access_token };
     } catch (error) {
      
-        throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException('Invalid mobile number or password', HttpStatus.UNAUTHORIZED);
       }
     }
   }
