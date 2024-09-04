@@ -187,7 +187,7 @@ export class VehicleService {
 
   async create(createVehicleDto: CreateVehicleDto): Promise<{ message: string; registrationNumber: string; vehicleId:number }> {
     try {
-      // Validate the VIN number
+      // Validating the VIN number
       const vinValidationResult = vin().validate({
         value: createVehicleDto.vinNumber,
         options: {
@@ -200,7 +200,7 @@ export class VehicleService {
         throw new HttpException(vinValidationResult.message, HttpStatus.BAD_REQUEST);
       }
 
-      // Check if VIN is unique
+      // Checking if VIN is unique
       const existingVehicle = await this.vehicleModel.findOne({
         where: { vinNumber: createVehicleDto.vinNumber },
       });
@@ -209,7 +209,7 @@ export class VehicleService {
         throw new HttpException('Vehicle with this VIN number already exists', HttpStatus.BAD_REQUEST);
       }
 
-      // Generate registration number
+      // Generating registration number
       const registrationNumber = await this.generateRegistrationNumber(createVehicleDto.rtoDivisionId);
 
       // Create the vehicle

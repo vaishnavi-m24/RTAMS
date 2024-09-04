@@ -7,6 +7,7 @@ import { LoginDto } from './login.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  //  /auth/login
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     const { mobileNumber, password } = loginDto;
