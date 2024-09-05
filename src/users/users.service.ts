@@ -82,7 +82,7 @@
 // }
 
 
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException,HttpException,HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
@@ -234,5 +234,19 @@ export class UserService {
     }
 
     await user.destroy();
+  }
+
+
+  async getUserStats() {
+    try {
+      const totalUsers = await this.userModel.count();
+      console.log(totalUsers);
+      return {
+        totalUsers,
+      };
+    } catch (error) {
+      console.error('Failed to retrieve dashboard stats:', error.message);
+      throw new HttpException('Failed to retrieve dashboard stats', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

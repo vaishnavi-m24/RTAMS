@@ -47,7 +47,7 @@
 
 
 
-import { Controller, Post, Body, Get, Param, Put, Delete, BadRequestException , UseGuards,Request} from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, BadRequestException , UseGuards,Request,HttpException,Req,HttpStatus} from '@nestjs/common';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -107,6 +107,17 @@ export class UserController {
     
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')  // Only accessible by admin
+  @Get('dashboard-stats')
+  async getUserStats(@Req() req: Request) {
+    try {
+      return await this.userService.getUserStats();
+    } catch (error) {
+      throw new HttpException('Failed to retrieve user stats', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'user')
   @Get(':mobileNumber')
   async findByMobileNumber(@Param('mobileNumber') mobileNumber: string, @Request() req) {
@@ -139,6 +150,7 @@ export class UserController {
   async remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
+
 }
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles('admin','user')

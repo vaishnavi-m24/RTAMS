@@ -328,4 +328,12 @@ export class VehicleService {
       throw new HttpException('Failed to delete vehicle', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async getVehicleStats() {
+    const totalVehicles = await this.vehicleModel.count();
+    console.log(totalVehicles);
+    return {
+      totalVehicles,
+    };
+  }
 }

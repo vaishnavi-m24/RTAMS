@@ -1,8 +1,8 @@
-import { Table, Column, Model, DataType, AllowNull, HasMany } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
 import { IsString, Length, IsOptional, IsEmail } from 'class-validator';
 import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 import { OwnershipHistory } from 'src/ownership-history/entities/ownership-history.entity';
-import { VehicleTransfer } from 'src/vehicle-transfer/entities/vehicle-transfer.entity';
+// import { VehicleTransfer } from 'src/vehicle-transfer/entities/vehicle-transfer.entity';
 
 @Table({ tableName: 'users' })
 export class User extends Model<User> {

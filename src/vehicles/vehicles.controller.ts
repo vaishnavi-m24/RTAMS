@@ -116,6 +116,19 @@ export class VehicleController {
     }
   }
 
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')  // Only accessible by admin
+  @Get('dashboard-stats')
+  async getVehicleStats(@Req() req: Request) {
+    try {
+      return await this.vehicleService.getVehicleStats();
+    } catch (error) {
+      throw new HttpException('Failed to retrieve vehicle stats', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     try {
@@ -170,4 +183,6 @@ export class VehicleController {
       throw new HttpException('Failed to delete vehicle', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+
 }
