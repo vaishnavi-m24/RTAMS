@@ -38,7 +38,7 @@
 // }
 
 
-import { Controller, Get, Post, Put, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Req, UseGuards,HttpException,HttpStatus } from '@nestjs/common';
 import { OwnershipHistoryService } from './ownership-history.service';
 import { CreateOwnershipHistoryDto } from './dto/create-ownership-history.dto';
 import { UpdateOwnershipHistoryDto } from './dto/update-ownership-history.dto';
@@ -58,6 +58,18 @@ export class OwnershipHistoryController {
       createOwnershipHistoryDto.ownerId = req.user.id;
     }
     return this.ownershipHistoryService.create(createOwnershipHistoryDto);
+  }
+
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')  // Only accessible by admin
+  @Get('dashboard-stats')
+  async getUserStats(@Req() req: Request) {
+    try {
+      return await this.ownershipHistoryService.getHistoryStats();
+    } catch (error) {
+      throw new HttpException('Failed to retrieve ownership-history stats', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

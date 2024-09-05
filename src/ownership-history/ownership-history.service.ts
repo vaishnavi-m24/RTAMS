@@ -208,4 +208,12 @@ export class OwnershipHistoryService {
       throw new HttpException('Failed to delete ownership history', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async getHistoryStats() {
+    const totalHistory = await this.ownershipHistoryModel.count();
+    console.log(totalHistory);
+    return {
+      totalHistory,
+    };
+  }
 }
