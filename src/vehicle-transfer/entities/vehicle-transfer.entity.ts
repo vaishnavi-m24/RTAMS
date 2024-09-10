@@ -86,7 +86,7 @@ export class VehicleTransfer extends Model<VehicleTransfer> {
 
   @Column({
     type: DataType.ENUM('Pending', 'Accepted', 'Rejected', 'Approved'),
-    allowNull: true, // Allow null if no requests are made
+    allowNull: true, 
   })
   status: string | null;
 

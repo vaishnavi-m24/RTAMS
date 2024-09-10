@@ -33,44 +33,51 @@
 //   }
 // }
 
-import { Controller, Post, Patch, Body, Param, Req, UseGuards } from '@nestjs/common';
+
+import { Controller, Post, Patch, Body, Param, Req, UseGuards,Get } from '@nestjs/common';
 import { VehicleTransferService } from './vehicle-transfer.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { CreateVehicleTransferDto, RespondToVehicleTransferDto, ProcessVehicleTransferDto } from './dto/create-vehicle-transfer.dto';
 
 @Controller('vehicle-transfers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class VehicleTransferController {
   constructor(private readonly vehicleTransferService: VehicleTransferService) {}
 
-  @Post('request-transfer/:vehicleId')
+  @Post('request-transfer')
   async requestTransfer(
-    @Param('vehicleId') vehicleId: number,
-    @Body('newOwnerMobile') newOwnerMobile: string,
+    @Body() createVehicleTransferDto: CreateVehicleTransferDto,
     @Req() req
   ) {
     const user = req.user;
-    return this.vehicleTransferService.requestTransfer(vehicleId, user.id, newOwnerMobile);
+    return this.vehicleTransferService.requestTransfer(createVehicleTransferDto.vehicleId, user.id, createVehicleTransferDto.newOwnerMobile);
   }
+
+  @Get('requests')
+async getTransferRequests(@Req() req) {
+  const userId = req.user.id;
+  return this.vehicleTransferService.getTransferRequestsForUser(userId);
+}
+
 
   @Patch('respond/:vehicleId')
   async respondToTransfer(
     @Param('vehicleId') vehicleId: number,
-    @Body('status') status: 'Accepted' | 'Rejected',
+    @Body() respondToVehicleTransferDto: RespondToVehicleTransferDto,
     @Req() req
   ) {
     const user = req.user;
-    return this.vehicleTransferService.respondToTransfer(vehicleId, user.id, status);
+    return this.vehicleTransferService.respondToTransfer(vehicleId, user.id, respondToVehicleTransferDto.status);
   }
 
   @Patch('process/:vehicleId')
   @Roles('admin')
   async processTransferByAdmin(
     @Param('vehicleId') vehicleId: number,
-    @Body('newOwnerId') newOwnerId: number,
-    @Body('status') status: 'Approved' | 'Rejected'
+    @Body() processVehicleTransferDto: ProcessVehicleTransferDto
   ) {
-    return this.vehicleTransferService.processTransferByAdmin(vehicleId, newOwnerId, status);
+    return this.vehicleTransferService.processTransferByAdmin(vehicleId, processVehicleTransferDto.newOwnerId, processVehicleTransferDto.status);
   }
 }

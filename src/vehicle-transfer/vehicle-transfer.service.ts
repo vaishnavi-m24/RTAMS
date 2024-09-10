@@ -35,6 +35,7 @@
 //   }
 // }
 
+
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { VehicleTransfer } from './entities/vehicle-transfer.entity';
@@ -86,9 +87,9 @@ export class VehicleTransferService {
     return { message: 'Transfer request submitted successfully' };
   }
 
-  async respondToTransfer(vehicleId: number, newOwnerId: number, status: 'Accepted' | 'Rejected'): Promise<{ message: string }> {
+  async respondToTransfer(vehicleId: number, currentOwnerId: number, status: 'Accepted' | 'Rejected'): Promise<{ message: string }> {
     const transfer = await this.vehicleTransferModel.findOne({
-      where: { vehicleId, newOwnerId, status: 'Pending' },
+      where: { vehicleId, currentOwnerId, status: 'Pending' },
     });
 
     if (!transfer) {
@@ -103,7 +104,6 @@ export class VehicleTransferService {
       return { message: 'Transfer request rejected' };
     }
 
-    // If accepted, the status remains 'Pending' until admin approves
     await transfer.update({
       status: 'Accepted',
     });
@@ -117,7 +117,7 @@ export class VehicleTransferService {
     });
 
     if (!transfer) {
-      throw new HttpException('Transfer request not found or not pending', HttpStatus.NOT_FOUND);
+      throw new HttpException('Transfer request not found or not accepted', HttpStatus.NOT_FOUND);
     }
 
     if (status === 'Rejected') {
@@ -134,12 +134,10 @@ export class VehicleTransferService {
       throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
     }
 
-    // Update the vehicle's owner
     await vehicle.update({
       ownerId: newOwnerId,
     });
 
-    // Update ownership history
     await this.ownershipHistoryModel.create({
       vehicleId,
       ownerId: transfer.currentOwnerId,
@@ -160,4 +158,16 @@ export class VehicleTransferService {
 
     return { message: 'Transfer approved and ownership updated' };
   }
+
+  async getTransferRequestsForUser(userId: number): Promise<VehicleTransfer[]> {
+    return this.vehicleTransferModel.findAll({
+      where: { newOwnerId: userId, status: 'Pending' },
+      include: [
+        { model: Vehicle },
+        { model: User, as: 'currentOwner' },
+        { model: User, as: 'newOwner' },
+      ],
+    });
+  }
+  
 }

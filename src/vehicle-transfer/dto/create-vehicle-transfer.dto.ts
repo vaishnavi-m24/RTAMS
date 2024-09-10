@@ -16,72 +16,40 @@
 //   vehicleId: number;
 // }
 
-import { IsString, IsInt, IsNotEmpty, IsOptional, IsDate, IsEnum } from 'class-validator';
 
-export class CreateVehicleDto {
-  // @ApiProperty({
-  //   description: 'The registration number of the vehicle',
-  //   example: 'ABC1234',
-  // })
-  @IsString()
-  @IsNotEmpty()
-  registrationNumber: string;
 
-  // @ApiProperty({
-  //   description: 'The make of the vehicle',
-  //   example: 'Toyota',
-  // })
-  @IsString()
-  @IsNotEmpty()
-  make: string;
+import { IsInt, IsNotEmpty, IsEnum, IsString, IsDateString, IsOptional } from 'class-validator';
 
-  // @ApiProperty({
-  //   description: 'The model of the vehicle',
-  //   example: 'Camry',
-  // })
-  @IsString()
-  @IsNotEmpty()
-  model: string;
-
-  // @ApiProperty({
-  //   description: 'The year of manufacture',
-  //   example: 2020,
-  // })
+export class CreateVehicleTransferDto {
   @IsInt()
   @IsNotEmpty()
-  year: number;
+  vehicleId: number;
 
-  // @ApiProperty({
-  //   description: 'The owner ID of the vehicle',
-  //   example: 1,
-  // })
   @IsInt()
   @IsNotEmpty()
-  ownerId: number;
+  currentOwnerId: number;
 
-  // @ApiProperty({
-  //   description: 'The status of the vehicle',
-  //   example: 'Available',
-  // })
   @IsString()
-  @IsOptional()
-  @IsEnum(['Available', 'In Use', 'Under Maintenance'])
-  status?: string;
-
-  // @ApiProperty({
-  //   description: 'Additional notes about the vehicle',
-  //   example: 'This vehicle has a sunroof.',
-  // })
-  @IsString()
-  @IsOptional()
-  notes?: string;
-
-  // @ApiProperty({
-  //   description: 'The date when the vehicle was registered',
-  //   example: '2024-01-01',
-  // })
-  @IsDate()
-  @IsOptional()
-  registrationDate?: Date;
+  @IsNotEmpty()
+  newOwnerMobile: string;
 }
 
+export class RespondToVehicleTransferDto {
+  @IsEnum(['Accepted', 'Rejected'])
+  @IsNotEmpty()
+  status: 'Accepted' | 'Rejected';
+}
+
+export class ProcessVehicleTransferDto {
+  @IsInt()
+  @IsNotEmpty()
+  vehicleId: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  newOwnerId: number;
+
+  @IsEnum(['Approved', 'Rejected'])
+  @IsNotEmpty()
+  status: 'Approved' | 'Rejected';
+}
