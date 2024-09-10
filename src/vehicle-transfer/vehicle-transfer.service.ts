@@ -35,7 +35,6 @@
 //   }
 // }
 
-
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { VehicleTransfer } from './entities/vehicle-transfer.entity';
@@ -106,7 +105,7 @@ export class VehicleTransferService {
 
     // If accepted, the status remains 'Pending' until admin approves
     await transfer.update({
-      status: 'Pending',
+      status: 'Accepted',
     });
 
     return { message: 'Transfer request accepted' };
@@ -114,7 +113,7 @@ export class VehicleTransferService {
 
   async processTransferByAdmin(vehicleId: number, newOwnerId: number, status: 'Approved' | 'Rejected'): Promise<{ message: string }> {
     const transfer = await this.vehicleTransferModel.findOne({
-      where: { vehicleId, newOwnerId, status: 'Pending' },
+      where: { vehicleId, newOwnerId, status: 'Accepted' },
     });
 
     if (!transfer) {

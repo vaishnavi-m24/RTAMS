@@ -43,8 +43,4 @@ export class CreateVehicleDto {
   @IsNotEmpty()
   ownerId: number;
 
-  @IsOptional()
-  @IsString()
-  requestStatus?: string ;
-  
 }

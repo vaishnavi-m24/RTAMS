@@ -40,6 +40,7 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
 @Controller('vehicle-transfers')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class VehicleTransferController {
   constructor(private readonly vehicleTransferService: VehicleTransferService) {}
 

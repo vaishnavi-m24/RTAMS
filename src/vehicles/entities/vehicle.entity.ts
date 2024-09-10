@@ -102,11 +102,6 @@ export class Vehicle extends Model<Vehicle> {
   registrationNumber: string;
 
 
-  @Column({
-    type: DataType.ENUM('Approved', 'Pending', 'Rejected'), 
-    allowNull: true, 
-    defaultValue: null, 
-  })
-  requestStatus: 'Approved' | 'Pending' | 'Rejected' | null;
+ 
 }
 

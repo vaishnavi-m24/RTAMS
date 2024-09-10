@@ -17,56 +17,56 @@
   //   private readonly rtoDivisionModel: typeof RtoDivision,
   // ) {}
 
-//   async create(createVehicleDto: CreateVehicleDto): Promise<{ message: string; registrationNumber: string; vehicleId:number }> {
-    // try {
-    //   // Validating the VIN number
-    //   const vinValidationResult = vin().validate({
-    //     value: createVehicleDto.vinNumber,
-    //     options: {
-    //       message: 'Invalid VIN number',
-    //     },
-    //   });
+  // async create(createVehicleDto: CreateVehicleDto): Promise<{ message: string; registrationNumber: string; vehicleId:number }> {
+  //   try {
+  //     // Validating the VIN number
+  //     const vinValidationResult = vin().validate({
+  //       value: createVehicleDto.vinNumber,
+  //       options: {
+  //         message: 'Invalid VIN number',
+  //       },
+  //     });
 
-    //   if (!vinValidationResult.valid) {
-    //     console.log(vinValidationResult);
-    //     throw new HttpException(vinValidationResult.message, HttpStatus.BAD_REQUEST);
-    //   }
+  //     if (!vinValidationResult.valid) {
+  //       console.log(vinValidationResult);
+  //       throw new HttpException(vinValidationResult.message, HttpStatus.BAD_REQUEST);
+  //     }
 
-    //   // Checking if VIN is unique
-    //   const existingVehicle = await this.vehicleModel.findOne({
-    //     where: { vinNumber: createVehicleDto.vinNumber },
-    //   });
+  //     // Checking if VIN is unique
+  //     const existingVehicle = await this.vehicleModel.findOne({
+  //       where: { vinNumber: createVehicleDto.vinNumber },
+  //     });
 
-    //   if (existingVehicle) {
-    //     throw new HttpException('Vehicle with this VIN number already exists', HttpStatus.BAD_REQUEST);
-    //   }
+  //     if (existingVehicle) {
+  //       throw new HttpException('Vehicle with this VIN number already exists', HttpStatus.BAD_REQUEST);
+  //     }
 
-    //   // Generating registration number
-    //   const registrationNumber = await this.generateRegistrationNumber(createVehicleDto.rtoDivisionId);
+  //     // Generating registration number
+  //     const registrationNumber = await this.generateRegistrationNumber(createVehicleDto.rtoDivisionId);
 
-//       // Create the vehicle
-//       const vehicle = await this.vehicleModel.create({
-//         ...createVehicleDto,
-//         registrationNumber,
-//       });
+  //     // Create the vehicle
+  //     const vehicle = await this.vehicleModel.create({
+  //       ...createVehicleDto,
+  //       registrationNumber,
+  //     });
 
-//       return { message: 'Vehicle created successfully', registrationNumber: vehicle.registrationNumber, vehicleId:vehicle.id };
-//     } catch (error) {
-//       if (error instanceof HttpException) {
-//         throw error;
-//       }
+  //     return { message: 'Vehicle created successfully', registrationNumber: vehicle.registrationNumber, vehicleId:vehicle.id };
+  //   } catch (error) {
+  //     if (error instanceof HttpException) {
+  //       throw error;
+  //     }
 
-//       console.error('Error creating vehicle:', error.message || error);
+  //     console.error('Error creating vehicle:', error.message || error);
 
-//       throw new HttpException(
-//         {
-//           message: 'Failed to create vehicle',
-//           error: error.message || 'An unexpected error occurred',
-//         },
-//         HttpStatus.INTERNAL_SERVER_ERROR,
-//       );
-//     }
-//   }
+  //     throw new HttpException(
+  //       {
+  //         message: 'Failed to create vehicle',
+  //         error: error.message || 'An unexpected error occurred',
+  //       },
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   // private async generateRegistrationNumber(rtoDivisionId: number): Promise<string> {
   //   const rtoDivision = await this.rtoDivisionModel.findByPk(rtoDivisionId);
@@ -171,7 +171,6 @@
 // }
 
 
-
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Vehicle } from './entities/vehicle.entity';
@@ -193,20 +192,15 @@ export class VehicleService {
 
   async create(createVehicleDto: CreateVehicleDto): Promise<{ message: string; registrationNumber: string; vehicleId:number }> {
     try {
-      // Validating the VIN number
       const vinValidationResult = vin().validate({
         value: createVehicleDto.vinNumber,
-        options: {
-          message: 'Invalid VIN number',
-        },
+        options: { message: 'Invalid VIN number' },
       });
 
       if (!vinValidationResult.valid) {
-        console.log(vinValidationResult);
         throw new HttpException(vinValidationResult.message, HttpStatus.BAD_REQUEST);
       }
 
-      // Checking if VIN is unique
       const existingVehicle = await this.vehicleModel.findOne({
         where: { vinNumber: createVehicleDto.vinNumber },
       });
@@ -215,67 +209,59 @@ export class VehicleService {
         throw new HttpException('Vehicle with this VIN number already exists', HttpStatus.BAD_REQUEST);
       }
 
-      // Generating registration number
       const registrationNumber = await this.generateRegistrationNumber(createVehicleDto.rtoDivisionId);
 
-    const vehicle = await this.vehicleModel.create({
-      ...createVehicleDto,
-      registrationNumber,
-      requestStatus: null,  // No request at the point of creation
-    });
+      const vehicle = await this.vehicleModel.create({
+        ...createVehicleDto,
+        registrationNumber,
+      });
 
-    return { message: 'Vehicle created successfully', registrationNumber: vehicle.registrationNumber, vehicleId: vehicle.id };
+      return { message: 'Vehicle created successfully', registrationNumber: vehicle.registrationNumber, vehicleId: vehicle.id };
+    } catch (error) {
+      console.error('Error creating vehicle:', error.message || error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        { message: 'Failed to create vehicle', error: error.message || 'An unexpected error occurred' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
-  catch (error) {
-    console.error('Error creating vehicle:', error.message || error);
 
-    // If the error is related to HTTP, throw it
-    if (error instanceof HttpException) {
-      throw error;
+  private async generateRegistrationNumber(rtoDivisionId: number): Promise<string> {
+    const rtoDivision = await this.rtoDivisionModel.findByPk(rtoDivisionId);
+    if (!rtoDivision) {
+      throw new HttpException('Invalid RTO Division ID', HttpStatus.BAD_REQUEST);
     }
 
-    // Otherwise, throw a generic internal server error
-    throw new HttpException(
-      {
-        message: 'Failed to create vehicle',
-        error: error.message || 'An unexpected error occurred',
-      },
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  }
-}
+    const rtoDivisionCode = rtoDivision.divisionCode;
+    const randomLetters = this.generateRandomLetters();
+    const uniqueNumber = await this.generateUniqueNumber(rtoDivisionId);
 
-private async generateRegistrationNumber(rtoDivisionId: number): Promise<string> {
-  const rtoDivision = await this.rtoDivisionModel.findByPk(rtoDivisionId);
-  if (!rtoDivision) {
-    throw new HttpException('Invalid RTO Division ID', HttpStatus.BAD_REQUEST);
+    return `${rtoDivisionCode}${randomLetters}${uniqueNumber}`;
   }
 
-  const rtoDivisionCode = rtoDivision.divisionCode;
-  const randomLetters = this.generateRandomLetters();
-  const uniqueNumber = await this.generateUniqueNumber(rtoDivisionId);
+  private generateRandomLetters(): string {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return Array(2)
+      .fill('')
+      .map(() => letters.charAt(Math.floor(Math.random() * letters.length)))
+      .join('');
+  }
 
-  return `${rtoDivisionCode}${randomLetters}${uniqueNumber}`;
-}
+  private async generateUniqueNumber(rtoDivisionId: number): Promise<string> {
+    const latestVehicle = await this.vehicleModel.findOne({
+      where: { rtoDivisionId },
+      order: [['createdAt', 'DESC']],
+    });
 
-private generateRandomLetters(): string {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  return Array(2)
-    .fill('')
-    .map(() => letters.charAt(Math.floor(Math.random() * letters.length)))
-    .join('');
-}
-
-private async generateUniqueNumber(rtoDivisionId: number): Promise<string> {
-  const latestVehicle = await this.vehicleModel.findOne({
-    where: { rtoDivisionId },
-    order: [['createdAt', 'DESC']],
-  });
-
-  const lastNumber = latestVehicle ? parseInt(latestVehicle.registrationNumber.slice(-4)) : 0;
-  const nextNumber = lastNumber + 1;
-  return nextNumber.toString().padStart(4, '0');
-}
+    const lastNumber = latestVehicle ? parseInt(latestVehicle.registrationNumber.slice(-4)) : 0;
+    const nextNumber = lastNumber + 1;
+    return nextNumber.toString().padStart(4, '0');
+  }
 
   async update(id: string, updateVehicleDto: UpdateVehicleDto): Promise<{ message: string }> {
     const vehicle = await this.vehicleModel.findByPk(id);
@@ -284,50 +270,10 @@ private async generateUniqueNumber(rtoDivisionId: number): Promise<string> {
       throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
     }
 
-    // handle updates
-    const updatedVehicle = await vehicle.update(updateVehicleDto);
+    await vehicle.update(updateVehicleDto);
     return { message: 'Vehicle updated successfully' };
   }
 
-  async requestVehicleTransfer(vehicleId: number, userId: number, buyerId: number): Promise<{ message: string }> {
-    const vehicle = await this.vehicleModel.findByPk(vehicleId);
-
-    if (!vehicle) {
-      throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
-    }
-
-    // Ensure the user requesting the transfer is the owner
-    if (vehicle.ownerId !== userId) {
-      throw new HttpException('Unauthorized transfer request', HttpStatus.FORBIDDEN);
-    }
-
-    // Update the request status
-    await vehicle.update({ requestStatus: 'Pending' });
-
-    // Additional logic to notify the buyer could go here...
-
-    return { message: 'Transfer request submitted successfully' };
-  }
-
-  async processVehicleTransferApproval(vehicleId: number, buyerId: number, status: 'Approved' | 'Rejected'): Promise<{ message: string }> {
-    const vehicle = await this.vehicleModel.findByPk(vehicleId);
-
-    if (!vehicle) {
-      throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
-    }
-
-    if (status === 'Approved') {
-      await vehicle.update({
-        ownerId: buyerId,
-        requestStatus: 'Approved',
-      });
-      return { message: 'Transfer approved and ownership transferred' };
-    } else {
-      await vehicle.update({ requestStatus: 'Rejected' });
-      return { message: 'Transfer request rejected' };
-    }
-  }
- 
   async findAll(user: User): Promise<Vehicle[]> {
     try {
       if (user.role === 'admin') {
@@ -338,7 +284,6 @@ private async generateUniqueNumber(rtoDivisionId: number): Promise<string> {
         });
       }
     } catch (error) {
-      console.log(error);
       throw new HttpException('Failed to retrieve vehicles', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -359,22 +304,25 @@ private async generateUniqueNumber(rtoDivisionId: number): Promise<string> {
       throw new HttpException('Failed to retrieve vehicle', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  
+
   async remove(id: string): Promise<{ message: string }> {
     const vehicle = await this.vehicleModel.findByPk(id);
     if (!vehicle) {
       throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
     }
+
     await vehicle.destroy();
     return { message: 'Vehicle deleted successfully' };
   }
 
-  async getVehicleStats() {
-    const totalVehicles = await this.vehicleModel.count();
-    console.log(totalVehicles);
-    return {
-      totalVehicles,
-    };
-  }
+  async getVehicleStats(): Promise<any> {
+    try {
+      const totalVehicles = await this.vehicleModel.count();
 
+      return { totalVehicles };
+    } catch (error) {
+      throw new HttpException('Failed to retrieve vehicle stats', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
+

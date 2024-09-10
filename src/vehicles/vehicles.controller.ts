@@ -127,7 +127,7 @@ export class VehicleController {
     try {
       const user = req.user;
       if (user.role !== 'admin') {
-        createVehicleDto.ownerId = user.id; // Set the ownerId to the current user's ID
+        createVehicleDto.ownerId = user.id; // Setting the ownerId as current user's ID
       }
       return await this.vehicleService.create(createVehicleDto);
     } catch (error) {
@@ -138,16 +138,17 @@ export class VehicleController {
     }
   }
 
-  @Get()
-  async findAll(@Req() req: Request) {
-    try {
-      const user = req.user;
-      return await this.vehicleService.findAll(user);
-    } catch (error) {
-      console.log(error);
-      throw new HttpException('Failed to retrieve vehicles', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+  
+   @Get()
+   async findAll(@Req() req: Request) {
+     try {
+       const user = req.user ; // Explicitly cast req.user to User type
+       return await this.vehicleService.findAll(user); // Delegate to service
+     } catch (error) {
+       console.error('Error retrieving vehicles:', error.message);
+       throw new HttpException('Failed to retrieve vehicles', HttpStatus.INTERNAL_SERVER_ERROR);
+     }
+   }
 
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -161,7 +162,6 @@ export class VehicleController {
     }
   }
 
-  
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     try {
@@ -216,27 +216,4 @@ export class VehicleController {
       throw new HttpException('Failed to delete vehicle', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
-  @Post('request-transfer/:id')
-  async requestTransfer(
-    @Param('id') vehicleId: string,
-    @Body('buyerId') buyerId: number,
-    @Req() req: Request,
-  ) {
-    const user = req.user;
-    return this.vehicleService.requestVehicleTransfer(Number(vehicleId), user.id, buyerId);
-  }
-
-  @Patch('process-transfer/:id')
-  @Roles('admin') // Only admin can process the transfer
-  async processTransfer(
-    @Param('id') vehicleId: string,
-    @Body('buyerId') buyerId: number,
-    @Body('status') status: 'Approved' | 'Rejected',
-  ) {
-    return this.vehicleService.processVehicleTransferApproval(Number(vehicleId), buyerId, status);
-  }
 }
-
-
-
