@@ -13,3 +13,4 @@ import { RtoDivision } from '../rto-divisions/entities/rto-division.entity';
   exports: [VehicleService],  
 })
 export class VehiclesModule {}
+

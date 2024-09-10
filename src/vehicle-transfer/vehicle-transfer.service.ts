@@ -35,72 +35,130 @@
 //   }
 // }
 
+
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { VehicleTransfer } from './entities/vehicle-transfer.entity';
-import { CreateVehicleTransferDto } from './dto/create-vehicle-transfer.dto';
-import { UpdateVehicleTransferDto } from './dto/update-vehicle-transfer.dto';
+import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
+import { User } from 'src/users/entities/user.entity';
+import { OwnershipHistory } from 'src/ownership-history/entities/ownership-history.entity';
 
 @Injectable()
 export class VehicleTransferService {
   constructor(
     @InjectModel(VehicleTransfer)
-    private readonly vehicleTransferModel: typeof VehicleTransfer
+    private readonly vehicleTransferModel: typeof VehicleTransfer,
+
+    @InjectModel(Vehicle)
+    private readonly vehicleModel: typeof Vehicle,
+
+    @InjectModel(User)
+    private readonly userModel: typeof User,
+
+    @InjectModel(OwnershipHistory)
+    private readonly ownershipHistoryModel: typeof OwnershipHistory,
   ) {}
 
-  async create(createVehicleTransferDto: CreateVehicleTransferDto): Promise<{ message: string }> {
-    try {
-      await this.vehicleTransferModel.create(createVehicleTransferDto);
-      return { message: 'Vehicle transfer created successfully' };
-    } catch (error) {
-      throw new HttpException('Failed to create vehicle transfer', HttpStatus.BAD_REQUEST);
+  async requestTransfer(vehicleId: number, currentOwnerId: number, newOwnerMobile: string): Promise<{ message: string }> {
+    const vehicle = await this.vehicleModel.findByPk(vehicleId);
+
+    if (!vehicle) {
+      throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
     }
+
+    if (vehicle.ownerId !== currentOwnerId) {
+      throw new HttpException('Unauthorized transfer request', HttpStatus.FORBIDDEN);
+    }
+
+    const newOwner = await this.userModel.findOne({ where: { mobileNumber: newOwnerMobile } });
+
+    if (!newOwner) {
+      throw new HttpException('Buyer is not registered', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.vehicleTransferModel.create({
+      vehicleId,
+      currentOwnerId,
+      newOwnerId: newOwner.id,
+      status: 'Pending',
+      requestDate: new Date(),
+    });
+
+    return { message: 'Transfer request submitted successfully' };
   }
 
-  async findAll(): Promise<VehicleTransfer[]> {
-    try {
-      return await this.vehicleTransferModel.findAll();
-    } catch (error) {
-      throw new HttpException('Failed to retrieve vehicle transfers', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+  async respondToTransfer(vehicleId: number, newOwnerId: number, status: 'Accepted' | 'Rejected'): Promise<{ message: string }> {
+    const transfer = await this.vehicleTransferModel.findOne({
+      where: { vehicleId, newOwnerId, status: 'Pending' },
+    });
 
-  async findOne(id: string): Promise<VehicleTransfer> {
-    try {
-      const vehicleTransfer = await this.vehicleTransferModel.findByPk(id);
-      if (!vehicleTransfer) {
-        throw new HttpException('Vehicle transfer not found', HttpStatus.NOT_FOUND);
-      }
-      return vehicleTransfer;
-    } catch (error) {
-      throw new HttpException('Failed to retrieve vehicle transfer', HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!transfer) {
+      throw new HttpException('Transfer request not found', HttpStatus.NOT_FOUND);
     }
-  }
 
-  async update(id: string, updateVehicleTransferDto: UpdateVehicleTransferDto): Promise<{ message: string }> {
-    try {
-      const [affectedRows] = await this.vehicleTransferModel.update(updateVehicleTransferDto, {
-        where: { id },
-        returning: true,
+    if (status === 'Rejected') {
+      await transfer.update({
+        status: 'Rejected',
+        rejectedDate: new Date(),
       });
-      if (affectedRows === 0) {
-        throw new HttpException('Vehicle transfer not found', HttpStatus.NOT_FOUND);
-      }
-      return { message: 'Vehicle transfer updated successfully' };
-    } catch (error) {
-      throw new HttpException('Failed to update vehicle transfer', HttpStatus.INTERNAL_SERVER_ERROR);
+      return { message: 'Transfer request rejected' };
     }
+
+    // If accepted, the status remains 'Pending' until admin approves
+    await transfer.update({
+      status: 'Pending',
+    });
+
+    return { message: 'Transfer request accepted' };
   }
 
-  async remove(id: string): Promise<{ message: string }> {
-    try {
-      const deletedRows = await this.vehicleTransferModel.destroy({ where: { id } });
-      if (deletedRows === 0) {
-        throw new HttpException('Vehicle transfer not found', HttpStatus.NOT_FOUND);
-      }
-      return { message: 'Vehicle transfer deleted successfully' };
-    } catch (error) {
-      throw new HttpException('Failed to delete vehicle transfer', HttpStatus.INTERNAL_SERVER_ERROR);
+  async processTransferByAdmin(vehicleId: number, newOwnerId: number, status: 'Approved' | 'Rejected'): Promise<{ message: string }> {
+    const transfer = await this.vehicleTransferModel.findOne({
+      where: { vehicleId, newOwnerId, status: 'Pending' },
+    });
+
+    if (!transfer) {
+      throw new HttpException('Transfer request not found or not pending', HttpStatus.NOT_FOUND);
     }
+
+    if (status === 'Rejected') {
+      await transfer.update({
+        status: 'Rejected',
+        rejectedDate: new Date(),
+      });
+      return { message: 'Transfer request rejected' };
+    }
+
+    const vehicle = await this.vehicleModel.findByPk(vehicleId);
+
+    if (!vehicle) {
+      throw new HttpException('Vehicle not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Update the vehicle's owner
+    await vehicle.update({
+      ownerId: newOwnerId,
+    });
+
+    // Update ownership history
+    await this.ownershipHistoryModel.create({
+      vehicleId,
+      ownerId: transfer.currentOwnerId,
+      ownershipStartDate: vehicle.createdAt,
+      ownershipEndDate: new Date(),
+    });
+
+    await this.ownershipHistoryModel.create({
+      vehicleId,
+      ownerId: newOwnerId,
+      ownershipStartDate: new Date(),
+    });
+
+    await transfer.update({
+      status: 'Approved',
+      approvedDate: new Date(),
+    });
+
+    return { message: 'Transfer approved and ownership updated' };
   }
 }
